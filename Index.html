@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVTOSHAKE - Garage as a Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090f;
+  --surface: #0e1018;
+  --card: #131620;
+  --border: #1e2232;
+  --green: #00e676;
+  --green2: #00c853;
+  --text: #e8eaf0;
+  --sub: #6b7280;
+  --muted: #2a2f42;
+  --red: #ff4444;
+  --blue: #2979ff;
+  --yellow: #ffd740;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 2px; }
+.page { display: none; min-height: 100vh; }
+.page.active { display: block; }
+
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(7,9,15,0.95); backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px; height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 2px; color: var(--text); cursor: pointer; }
+.nav-logo span { color: var(--green); }
+.nav-actions { display: flex; gap: 10px; align-items: center; }
+.btn { padding: 8px 18px; border-radius: 4px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; border: none; transition: all 0.2s; }
+.btn-primary { background: var(--green); color: #000; font-weight: 700; }
+.btn-primary:hover { background: var(--green2); }
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+.btn-outline:hover { border-color: var(--green); color: var(--green); }
+.btn-ghost { background: transparent; color: var(--sub); font-size: 13px; padding: 8px 12px; }
+.btn-ghost:hover { color: var(--text); }
+
+#landing { padding-top: 60px; }
+.hero {
+  min-height: calc(100vh - 60px); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center;
+  padding: 60px 20px 40px; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,230,118,0.06) 0%, transparent 70%);
+  top: 50%; left: 50%; transform: translate(-50%, -50%); pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 14px; border: 1px solid rgba(0,230,118,0.3); border-radius: 20px;
+  font-size: 11px; letter-spacing: 3px; color: var(--green); text-transform: uppercase;
+  margin-bottom: 28px; animation: fadeUp 0.6s ease both;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green); box-shadow: 0 0 8px var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+h1.hero-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: clamp(52px, 12vw, 96px); font-weight: 800;
+  line-height: 0.9; letter-spacing: -1px; margin-bottom: 24px;
+  animation: fadeUp 0.6s 0.1s ease both;
+}
+h1.hero-title .green { color: var(--green); }
+.hero-sub { font-size: 16px; color: var(--sub); max-width: 480px; line-height: 1.7; margin-bottom: 36px; animation: fadeUp 0.6s 0.2s ease both; }
+.hero-ctas { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-bottom: 60px; animation: fadeUp 0.6s 0.3s ease both; }
+.btn-lg { padding: 14px 28px; font-size: 15px; border-radius: 4px; }
+.hero-stats { display: flex; gap: 48px; animation: fadeUp 0.6s 0.4s ease both; flex-wrap: wrap; justify-content: center; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; color: var(--green); }
+.stat-label { font-size: 11px; color: var(--sub); letter-spacing: 1px; margin-top: 2px; }
+
+.search-section { background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 40px 20px; }
+.search-inner { max-width: 700px; margin: 0 auto; text-align: center; }
+.search-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; }
+.search-box { display: flex; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--card); transition: border-color 0.3s; }
+.search-box:focus-within { border-color: var(--green); }
+.search-box input { flex: 1; padding: 14px 16px; background: transparent; border: none; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
+.search-box input::placeholder { color: var(--sub); }
+.search-box button { padding: 14px 24px; background: var(--green); border: none; color: #000; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+.search-box button:hover { background: var(--green2); }
+
+.section { padding: 80px 20px; max-width: 1000px; margin: 0 auto; }
+.section-tag { font-size: 10px; letter-spacing: 4px; color: var(--green); text-transform: uppercase; margin-bottom: 12px; }
+.section-title { font-family: 'Barlow Condensed', sans-serif; font-size: clamp(32px, 6vw, 52px); font-weight: 700; letter-spacing: 1px; margin-bottom: 48px; }
+.features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 2px; }
+.feature-card { background: var(--card); border: 1px solid var(--border); padding: 28px 24px; position: relative; overflow: hidden; transition: border-color 0.3s; }
+.feature-card:hover { border-color: rgba(0,230,118,0.3); }
+.feature-icon { font-size: 22px; margin-bottom: 14px; display: block; color: var(--green); font-weight: 700; font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; }
+.feature-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 1px; margin-bottom: 8px; }
+.feature-desc { font-size: 13px; color: var(--sub); line-height: 1.6; }
+
+#customer { padding-top: 60px; }
+.app-header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; display: flex; align-items: center; gap: 16px; }
+.tab-bar { display: flex; gap: 4px; padding: 16px 20px; border-bottom: 1px solid var(--border); overflow-x: auto; }
+.tab { padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: 500; cursor: pointer; border: 1px solid var(--border); color: var(--sub); white-space: nowrap; transition: all 0.2s; background: transparent; }
+.tab.active { background: var(--green); color: #000; border-color: var(--green); font-weight: 700; }
+.content-area { padding: 20px; max-width: 800px; margin: 0 auto; }
+.garage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-top: 16px; }
+.garage-card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.2s; }
+.garage-card:hover { border-color: rgba(0,230,118,0.4); transform: translateY(-2px); }
+.garage-img { height: 120px; background: linear-gradient(135deg, #1a2030, #0e1525); display: flex; align-items: center; justify-content: center; position: relative; }
+.garage-img-icon { font-family: 'Barlow Condensed', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 2px; color: var(--green); opacity: 0.5; }
+.verified-badge { position: absolute; top: 10px; right: 10px; background: rgba(0,230,118,0.15); border: 1px solid var(--green); color: var(--green); font-size: 9px; letter-spacing: 1px; padding: 3px 8px; border-radius: 10px; font-weight: 700; }
+.garage-info { padding: 14px; }
+.garage-name { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+.garage-meta { font-size: 12px; color: var(--sub); display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.rating { color: var(--yellow); font-size: 11px; }
+.garage-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.tag { padding: 3px 10px; background: var(--muted); border-radius: 10px; font-size: 10px; color: var(--sub); }
+.garage-footer { display: flex; align-items: center; justify-content: space-between; }
+.price { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: var(--green); }
+.price span { font-size: 11px; color: var(--sub); font-family: 'DM Sans'; font-weight: 400; }
+
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px); }
+.modal-overlay.active { display: flex; }
+.modal { background: var(--card); border: 1px solid var(--border); border-radius: 16px 16px 0 0; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; padding: 24px; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.modal-handle { width: 40px; height: 4px; background: var(--muted); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: 1px; margin-bottom: 20px; }
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 11px; letter-spacing: 2px; color: var(--sub); text-transform: uppercase; margin-bottom: 8px; display: block; }
+.form-input { width: 100%; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; transition: border-color 0.2s; }
+.form-input:focus { border-color: var(--green); }
+.service-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.service-opt { padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; transition: all 0.2s; background: var(--surface); text-align: center; color: var(--text); }
+.service-opt.selected { border-color: var(--green); background: rgba(0,230,118,0.08); color: var(--green); }
+.payment-box { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin: 16px 0; }
+.payment-title { font-size: 11px; letter-spacing: 3px; color: var(--green); text-transform: uppercase; margin-bottom: 12px; }
+.payment-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 8px; color: var(--sub); }
+.payment-row.total { color: var(--text); font-weight: 600; font-size: 15px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: 6px; }
+.escrow-note { font-size: 11px; color: var(--sub); text-align: center; padding: 10px; border: 1px solid rgba(0,230,118,0.15); border-radius: 6px; background: rgba(0,230,118,0.03); margin-top: 12px; }
+.escrow-note strong { color: var(--green); }
+.success-screen { display: none; text-align: center; padding: 40px 20px; }
+.success-screen.active { display: block; }
+.success-icon { width: 80px; height: 80px; border-radius: 50%; background: rgba(0,230,118,0.1); border: 2px solid var(--green); display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 700; color: var(--green); margin: 0 auto 20px; animation: scaleIn 0.4s ease; font-family: 'Barlow Condensed', sans-serif; }
+@keyframes scaleIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: var(--green); margin-bottom: 8px; }
+.success-sub { font-size: 14px; color: var(--sub); margin-bottom: 24px; }
+
+#garage { padding-top: 60px; }
+.portal-header { padding: 24px 20px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.portal-title { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.portal-sub { font-size: 13px; color: var(--sub); margin-top: 4px; }
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; margin: 20px; }
+.stat-card { background: var(--card); border: 1px solid var(--border); padding: 16px; text-align: center; }
+.stat-card-num { font-family: 'Barlow Condensed', sans-serif; font-size: 28px; font-weight: 700; color: var(--green); }
+.stat-card-label { font-size: 10px; color: var(--sub); letter-spacing: 1px; margin-top: 4px; }
+.orders-section { padding: 0 20px 20px; }
+.orders-title { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px; }
+.order-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.order-left { flex: 1; min-width: 200px; }
+.order-customer { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+.order-service { font-size: 12px; color: var(--sub); }
+.order-status { padding: 4px 12px; border-radius: 10px; font-size: 11px; font-weight: 700; letter-spacing: 1px; }
+.status-pending { background: rgba(255,215,64,0.1); color: var(--yellow); border: 1px solid rgba(255,215,64,0.3); }
+.status-active { background: rgba(0,230,118,0.1); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
+.status-done { background: rgba(107,114,128,0.1); color: var(--sub); border: 1px solid var(--border); }
+.order-amount { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--green); }
+
+#admin { padding-top: 60px; }
+.admin-sidebar { position: fixed; left: 0; top: 60px; bottom: 0; width: 200px; background: var(--surface); border-right: 1px solid var(--border); padding: 20px 0; z-index: 50; }
+.sidebar-item { padding: 12px 20px; font-size: 13px; cursor: pointer; color: var(--sub); display: flex; align-items: center; gap: 10px; transition: all 0.2s; border-left: 2px solid transparent; }
+.sidebar-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.sidebar-item.active { color: var(--green); border-left-color: var(--green); background: rgba(0,230,118,0.05); }
+.admin-main { margin-left: 200px; padding: 24px; }
+.admin-title { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 2px; margin-bottom: 24px; }
+.admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; margin-bottom: 32px; }
+.admin-stat { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; position: relative; overflow: hidden; }
+.admin-stat::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--stat-color, var(--green)); }
+.admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 700; color: var(--stat-color, var(--green)); }
+.admin-stat-label { font-size: 11px; color: var(--sub); letter-spacing: 1px; margin-top: 4px; }
+.data-table { background: var(--card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+.table-header { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.table-title { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; }
+.table-row { padding: 14px 20px; display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--border); font-size: 13px; transition: background 0.2s; }
+.table-row:last-child { border-bottom: none; }
+.table-row:hover { background: rgba(255,255,255,0.02); }
+.table-row .col { flex: 1; }
+.table-row .col-sm { width: 80px; text-align: center; }
+
+#pay-page { padding-top: 60px; }
+.pay-hero { background: linear-gradient(135deg, #07090f 0%, #0a1a0f 100%); border-bottom: 1px solid rgba(0,230,118,0.15); padding: 48px 20px; text-align: center; }
+.pay-logo { font-family: 'Barlow Condensed', sans-serif; font-size: 36px; font-weight: 800; letter-spacing: 4px; margin-bottom: 12px; }
+.pay-logo span { color: var(--green); }
+.pay-sub { font-size: 14px; color: var(--sub); margin-bottom: 32px; }
+.wallet-card { max-width: 360px; margin: 0 auto; background: linear-gradient(135deg, #0e2010, #071209); border: 1px solid rgba(0,230,118,0.2); border-radius: 16px; padding: 28px; text-align: left; position: relative; overflow: hidden; }
+.wallet-label { font-size: 11px; letter-spacing: 3px; color: rgba(0,230,118,0.6); margin-bottom: 8px; }
+.wallet-balance { font-family: 'Barlow Condensed', sans-serif; font-size: 48px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+.wallet-currency { font-size: 13px; color: var(--sub); margin-bottom: 24px; }
+.wallet-actions { display: flex; gap: 10px; }
+.wallet-btn { flex: 1; padding: 10px; border-radius: 8px; font-size: 12px; font-weight: 700; text-align: center; cursor: pointer; border: none; transition: all 0.2s; }
+.wallet-btn-primary { background: var(--green); color: #000; }
+.wallet-btn-outline { background: transparent; border: 1px solid rgba(0,230,118,0.3); color: var(--green); }
+.pay-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; max-width: 900px; margin: 40px auto; padding: 0 20px; }
+.pay-feature { background: var(--card); border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; }
+.pay-feature-icon { font-size: 13px; font-weight: 700; color: var(--green); font-family: 'Barlow Condensed', sans-serif; letter-spacing: 1px; margin-bottom: 10px; }
+.pay-feature-title { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+.pay-feature-desc { font-size: 12px; color: var(--sub); line-height: 1.5; }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(7,9,15,0.95); backdrop-filter: blur(20px); border-top: 1px solid var(--border); display: none; padding: 8px 0 12px; z-index: 100; }
+.bottom-nav-item { flex: 1; text-align: center; cursor: pointer; padding: 6px; transition: all 0.2s; }
+.bottom-nav-label { font-size: 9px; letter-spacing: 1px; color: var(--sub); }
+.bottom-nav-item.active .bottom-nav-label { color: var(--green); }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.step-indicator { display: flex; gap: 8px; margin-bottom: 28px; align-items: center; }
+.step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--sub); font-weight: 700; }
+.step-dot.active { border-color: var(--green); color: var(--green); }
+.step-dot.done { background: var(--green); border-color: var(--green); color: #000; }
+.step-line { flex: 1; height: 1px; background: var(--border); }
+
+@media (max-width: 700px) {
+  .admin-sidebar { display: none; }
+  .admin-main { margin-left: 0; padding: 16px; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .bottom-nav { display: flex; }
+  .content-area { padding-bottom: 80px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo" onclick="showPage('landing')">AVTO<span>SHAKE</span></div>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" onclick="showPage('garage')">For Garages</button>
+    <button class="btn btn-ghost" onclick="showPage('pay-page')">Pay</button>
+    <button class="btn btn-outline" onclick="showPage('customer')">Find Garage</button>
+    <button class="btn btn-primary" onclick="showPage('garage')">List Garage</button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div id="landing" class="page active">
+  <div class="hero">
+    <div class="hero-badge"><div class="hero-badge-dot"></div>Infrastructure-Grade Platform</div>
+    <h1 class="hero-title">GARAGE AS A<br><span class="green">SERVICE.</span></h1>
+    <p class="hero-sub">Global infrastructure for vehicle maintenance. Connect with verified bays, manage fleets, and process payments securely via AVTOSHAKE Pay.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-primary btn-lg" onclick="showPage('customer')">Find a Garage</button>
+      <button class="btn btn-outline btn-lg" onclick="showPage('garage')">Register Facility</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">450+</div><div class="stat-label">Verified Locations</div></div>
+      <div class="stat"><div class="stat-num">12K+</div><div class="stat-label">Bookings Done</div></div>
+      <div class="stat"><div class="stat-num">98%</div><div class="stat-label">Satisfaction Rate</div></div>
+    </div>
+  </div>
+
+  <div class="search-section">
+    <div class="search-inner">
+      <div class="search-title">Find a Garage Near You</div>
+      <div class="search-box">
+        <input type="text" placeholder="Enter your city, area or pincode..." id="heroSearch">
+        <button onclick="doSearch()">Search</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-tag">Why AVTOSHAKE</div>
+    <div class="section-title">Everything You Need.</div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">INSTANT</div>
+        <div class="feature-title">Instant Booking</div>
+        <div class="feature-desc">Real-time availability for hydraulic lifts, paint booths, and EV charging stations.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">SECURE</div>
+        <div class="feature-title">Escrow Protection</div>
+        <div class="feature-desc">Funds held securely in AVTOSHAKE Pay until the service is completed and verified.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">VERIFIED</div>
+        <div class="feature-title">Verified Supply</div>
+        <div class="feature-desc">Every garage physically verified for tool quality, insurance, and safety compliance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">FLEET</div>
+        <div class="feature-title">Fleet Management</div>
+        <div class="feature-desc">Prepaid balance, bulk bookings, and analytics for fleet operators and businesses.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">MECHANIC</div>
+        <div class="feature-title">Freelance Mechanics</div>
+        <div class="feature-desc">Book verified independent mechanics for home visits or garage assistance.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">DATA</div>
+        <div class="feature-title">Data Intelligence</div>
+        <div class="feature-desc">Vehicle failure patterns, service analytics, and EV maintenance insights.</div>
+      </div>
+    </div>
+  </div>
+
+  <div style="text-align:center; padding: 60px 20px; background: var(--surface); border-top: 1px solid var(--border);">
+    <div class="section-tag" style="text-align:center;">Ready?</div>
+    <div style="font-family:'Barlow Condensed',sans-serif; font-size:clamp(32px,6vw,56px); font-weight:800; letter-spacing:1px; margin-bottom:24px;">MODERNIZE YOUR<br>INFRASTRUCTURE.</div>
+    <button class="btn btn-primary btn-lg" onclick="showPage('garage')">Create Free Account</button>
+    <div style="font-size:12px; color:var(--sub); margin-top:16px;">© 2025 Global Automotive Infrastructure Ltd. — AVTOSHAKE</div>
+  </div>
+</div>
+
+<!-- CUSTOMER -->
+<div id="customer" class="page">
+  <div class="app-header">
+    <button class="btn btn-ghost" onclick="showPage('landing')" style="padding:8px;">Back</button>
+    <div style="flex:1;">
+      <div style="font-family:'Barlow Condensed',sans-serif; font-size:18px; font-weight:700; letter-spacing:1px;">FIND A GARAGE</div>
+      <div style="font-size:12px; color:var(--sub);">450+ verified locations</div>
+    </div>
+    <div style="width:36px; height:36px; border-radius:50%; background:var(--green); display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; color:#000;">U</div>
+  </div>
+
+  <div style="padding:16px 20px; border-bottom:1px solid var(--border);">
+    <div class="search-box">
+      <input type="text" placeholder="Search by location, service..." style="font-size:13px;">
+      <button>Search</button>
+    </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="setTab(this)">All</button>
+    <button class="tab" onclick="setTab(this)">EV Specialist</button>
+    <button class="tab" onclick="setTab(this)">Body Work</button>
+    <button class="tab" onclick="setTab(this)">Mechanics</button>
+    <button class="tab" onclick="setTab(this)">Tyre and Wheel</button>
+  </div>
+
+  <div class="content-area">
+    <div style="font-size:12px; color:var(--sub); margin-bottom:8px;">Showing 6 garages near you</div>
+    <div class="garage-grid">
+
+      <div class="garage-card" onclick="openBooking('AutoFix Pro')">
+        <div class="garage-img"><div class="garage-img-icon">AUTOFIX PRO</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">AutoFix Pro</div>
+          <div class="garage-meta"><span class="rating">4.9 stars</span> · 2.1 km away</div>
+          <div class="garage-tags"><span class="tag">AC Repair</span><span class="tag">Paint</span><span class="tag">EV</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.499 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garage-card" onclick="openBooking('SpeedTech Garage')">
+        <div class="garage-img"><div class="garage-img-icon">SPEEDTECH</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">SpeedTech Garage</div>
+          <div class="garage-meta"><span class="rating">4.6 stars</span> · 3.4 km away</div>
+          <div class="garage-tags"><span class="tag">Wheel Align</span><span class="tag">Tyres</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.350 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garage-card" onclick="openBooking('EV Masters')">
+        <div class="garage-img"><div class="garage-img-icon">EV MASTERS</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">EV Masters</div>
+          <div class="garage-meta"><span class="rating">5.0 stars</span> · 1.8 km away</div>
+          <div class="garage-tags"><span class="tag">EV Only</span><span class="tag">Battery</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.699 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garage-card" onclick="openBooking('City Auto Works')">
+        <div class="garage-img"><div class="garage-img-icon">CITY AUTO</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">City Auto Works</div>
+          <div class="garage-meta"><span class="rating">4.4 stars</span> · 4.2 km away</div>
+          <div class="garage-tags"><span class="tag">General</span><span class="tag">Brakes</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.280 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garage-card" onclick="openBooking('Premium Body Shop')">
+        <div class="garage-img"><div class="garage-img-icon">PREMIUM BODY</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">Premium Body Shop</div>
+          <div class="garage-meta"><span class="rating">4.8 stars</span> · 5.1 km away</div>
+          <div class="garage-tags"><span class="tag">Body Work</span><span class="tag">Paint</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.850 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="garage-card" onclick="openBooking('QuickFix Station')">
+        <div class="garage-img"><div class="garage-img-icon">QUICKFIX</div><div class="verified-badge">VERIFIED</div></div>
+        <div class="garage-info">
+          <div class="garage-name">QuickFix Station</div>
+          <div class="garage-meta"><span class="rating">4.5 stars</span> · 0.9 km away</div>
+          <div class="garage-tags"><span class="tag">Emergency</span><span class="tag">Puncture</span></div>
+          <div class="garage-footer">
+            <div class="price">Rs.220 <span>/ hour</span></div>
+            <button class="btn btn-primary" style="font-size:11px; padding:6px 14px;">Book Now</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="bookingModal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="bookingContent">
+      <div class="modal-title" id="modalGarageName">Book Garage</div>
+      <div class="form-group">
+        <label class="form-label">Your Vehicle</label>
+        <input type="text" class="form-input" placeholder="e.g. Honda City 2022, Maruti Swift...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Service Required</label>
+        <div class="service-options">
+          <div class="service-opt selected" onclick="selectService(this)">Oil Change</div>
+          <div class="service-opt" onclick="selectService(this)">AC Repair</div>
+          <div class="service-opt" onclick="selectService(this)">Tyre Change</div>
+          <div class="service-opt" onclick="selectService(this)">Full Service</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Preferred Date and Time</label>
+        <input type="datetime-local" class="form-input">
+      </div>
+      <div class="payment-box">
+        <div class="payment-title">AVTOSHAKE PAY — ESCROW</div>
+        <div class="payment-row"><span>Service estimate (2 hrs)</span><span>Rs.998</span></div>
+        <div class="payment-row"><span>Platform fee</span><span>Rs.49</span></div>
+        <div class="payment-row"><span>AVTOSHAKE Pay deposit</span><span>Rs.200</span></div>
+        <div class="payment-row total"><span>Total held in escrow</span><span>Rs.1,247</span></div>
+        <div class="escrow-note"><strong>Funds are held securely.</strong> Released to garage only after you confirm service completion.</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding:14px; font-size:15px; font-weight:700;" onclick="confirmBooking()">Confirm and Pay via AVTOSHAKE Pay</button>
+      <button class="btn btn-ghost" style="width:100%; margin-top:8px;" onclick="closeBooking()">Cancel</button>
+    </div>
+    <div class="success-screen" id="bookingSuccess">
+      <div class="success-icon">OK</div>
+      <div class="success-title">BOOKING CONFIRMED!</div>
+      <div class="success-sub">Your booking is confirmed. Funds held in AVTOSHAKE Pay escrow until service completion.</div>
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:20px; text-align:left;">
+        <div style="font-size:11px; color:var(--sub); margin-bottom:4px;">BOOKING ID</div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-size:20px; font-weight:700; color:var(--green);">AVS-2025-0847</div>
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="closeBooking()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- GARAGE PORTAL -->
+<div id="garage" class="page">
+  <div class="portal-header">
+    <button class="btn btn-ghost" onclick="showPage('landing')" style="padding:8px; margin-bottom:8px;">Back</button>
+    <div style="display:flex; align-items:center; justify-content:space-between;">
+      <div>
+        <div class="portal-title">GARAGE PORTAL</div>
+        <div class="portal-sub">AutoFix Pro · Konnagar, West Bengal</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:11px; color:var(--sub);">WALLET BALANCE</div>
+        <div style="font-family:'Barlow Condensed',sans-serif; font-size:28px; font-weight:700; color:var(--green);">Rs.24,850</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-card-num">18</div><div class="stat-card-label">Today's Bookings</div></div>
+    <div class="stat-card"><div class="stat-card-num">Rs.8.2K</div><div class="stat-card-label">Today's Revenue</div></div>
+    <div class="stat-card"><div class="stat-card-num">4.9</div><div class="stat-card-label">Rating</div></div>
+    <div class="stat-card"><div class="stat-card-num">342</div><div class="stat-card-label">Total Jobs</div></div>
+  </div>
+
+  <div class="orders-section">
+    <div class="orders-title">Live Orders</div>
+    <div class="order-item">
+      <div class="order-left"><div class="order-customer">Rahul Sharma — Honda City</div><div class="order-service">AC Repair + Oil Change · 10:30 AM</div></div>
+      <div class="order-status status-active">IN PROGRESS</div>
+      <div class="order-amount">Rs.998</div>
+    </div>
+    <div class="order-item">
+      <div class="order-left"><div class="order-customer">Priya Mehta — Maruti Swift</div><div class="order-service">Full Service · 12:00 PM</div></div>
+      <div class="order-status status-pending">UPCOMING</div>
+      <div class="order-amount">Rs.1,499</div>
+    </div>
+    <div class="order-item">
+      <div class="order-left"><div class="order-customer">Amit Das — Hyundai i20</div><div class="order-service">Tyre Change · 9:00 AM</div></div>
+      <div class="order-status status-done">COMPLETED</div>
+      <div class="order-amount">Rs.650</div>
+    </div>
+
+    <div style="margin-top:24px;">
+      <div class="orders-title">Register Your Garage</div>
+      <div class="step-indicator">
+        <div class="step-dot done">1</div>
+        <div class="step-line"></div>
+        <div class="step-dot active">2</div>
+        <div class="step-line"></div>
+        <div class="step-dot">3</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Garage Name</label>
+        <input type="text" class="form-input" placeholder="Your garage name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Location / Address</label>
+        <input type="text" class="form-input" placeholder="Full address with pincode">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Services Offered</label>
+        <div class="service-options">
+          <div class="service-opt selected" onclick="selectService(this)">General Repair</div>
+          <div class="service-opt" onclick="selectService(this)">Body Work</div>
+          <div class="service-opt" onclick="selectService(this)">EV Service</div>
+          <div class="service-opt" onclick="selectService(this)">AC Repair</div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Contact Number</label>
+        <input type="tel" class="form-input" placeholder="+91 XXXXX XXXXX">
+      </div>
+      <button class="btn btn-primary" style="width:100%; padding:14px; font-size:15px; font-weight:700; margin-top:8px;">Submit for Verification</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="admin" class="page">
+  <div class="admin-sidebar">
+    <div style="padding:16px 20px; border-bottom:1px solid var(--border); margin-bottom:12px;">
+      <div style="font-family:'Barlow Condensed',sans-serif; font-size:14px; font-weight:700; letter-spacing:2px; color:var(--green);">ADMIN</div>
+    </div>
+    <div class="sidebar-item active">Dashboard</div>
+    <div class="sidebar-item">Garages</div>
+    <div class="sidebar-item">Users</div>
+    <div class="sidebar-item">Bookings</div>
+    <div class="sidebar-item">Payments</div>
+    <div class="sidebar-item">Analytics</div>
+    <div class="sidebar-item">Disputes</div>
+    <div class="sidebar-item">Freeze Wallets</div>
+    <div class="sidebar-item" onclick="showPage('landing')">Back to Site</div>
+  </div>
+
+  <div class="admin-main">
+    <div class="admin-title">DASHBOARD</div>
+    <div class="admin-grid">
+      <div class="admin-stat" style="--stat-color: var(--green);"><div class="admin-stat-num">1,247</div><div class="admin-stat-label">Total Garages</div></div>
+      <div class="admin-stat" style="--stat-color: var(--blue);"><div class="admin-stat-num">28,490</div><div class="admin-stat-label">Registered Users</div></div>
+      <div class="admin-stat" style="--stat-color: var(--yellow);"><div class="admin-stat-num">Rs.84.2L</div><div class="admin-stat-label">Escrow Volume</div></div>
+      <div class="admin-stat" style="--stat-color: var(--red);"><div class="admin-stat-num">14</div><div class="admin-stat-label">Open Disputes</div></div>
+    </div>
+
+    <div class="data-table">
+      <div class="table-header">
+        <div class="table-title">Recent Registrations</div>
+        <button class="btn btn-outline" style="font-size:11px; padding:6px 12px;">Export Data</button>
+      </div>
+      <div class="table-row" style="background:var(--surface); font-size:10px; letter-spacing:2px; color:var(--sub);">
+        <div class="col">GARAGE NAME</div><div class="col">LOCATION</div><div class="col-sm">STATUS</div><div class="col-sm">REVENUE</div>
+      </div>
+      <div class="table-row">
+        <div class="col" style="font-weight:600;">AutoFix Pro</div>
+        <div class="col" style="color:var(--sub); font-size:12px;">Konnagar, WB</div>
+        <div class="col-sm"><span class="order-status status-active" style="font-size:9px;">ACTIVE</span></div>
+        <div class="col-sm" style="color:var(--green); font-weight:600;">Rs.24,850</div>
+      </div>
+      <div class="table-row">
+        <div class="col" style="font-weight:600;">SpeedTech</div>
+        <div class="col" style="color:var(--sub); font-size:12px;">Kolkata, WB</div>
+        <div class="col-sm"><span class="order-status status-active" style="font-size:9px;">ACTIVE</span></div>
+        <div class="col-sm" style="color:var(--green); font-weight:600;">Rs.18,200</div>
+      </div>
+      <div class="table-row">
+        <div class="col" style="font-weight:600;">EV Masters</div>
+        <div class="col" style="color:var(--sub); font-size:12px;">Bangalore, KA</div>
+        <div class="col-sm"><span class="order-status status-pending" style="font-size:9px;">PENDING</span></div>
+        <div class="col-sm" style="color:var(--sub);">—</div>
+      </div>
+    </div>
+
+    <div class="data-table">
+      <div class="table-header">
+        <div class="table-title">Data Export — DATABANK</div>
+        <button class="btn btn-primary" style="font-size:11px; padding:6px 12px;" onclick="alert('Data export to DATABANK initiated.')">Export to DATABANK</button>
+      </div>
+      <div class="table-row">
+        <div class="col">Vehicle failure patterns</div>
+        <div class="col" style="color:var(--sub); font-size:12px;">28,490 records</div>
+        <div class="col-sm"><span class="order-status status-active" style="font-size:9px;">READY</span></div>
+      </div>
+      <div class="table-row">
+        <div class="col">Garage utilization analytics</div>
+        <div class="col" style="color:var(--sub); font-size:12px;">1,247 garages</div>
+        <div class="col-sm"><span class="order-status status-active" style="font-size:9px;">READY</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AVTOSHAKE PAY -->
+<div id="pay-page" class="page">
+  <div style="padding-top:60px;">
+    <div class="pay-hero">
+      <button class="btn btn-ghost" onclick="showPage('landing')" style="margin-bottom:16px;">Back</button>
+      <div class="pay-logo">AVTO<span>PAY</span></div>
+      <div class="pay-sub">Secure escrow payments for automotive services</div>
+      <div class="wallet-card">
+        <div class="wallet-label">YOUR WALLET BALANCE</div>
+        <div class="wallet-balance">Rs.3,240</div>
+        <div class="wallet-currency">Indian Rupees — AVTOSHAKE Pay</div>
+        <div class="wallet-actions">
+          <button class="wallet-btn wallet-btn-primary">+ Add Money</button>
+          <button class="wallet-btn wallet-btn-outline">Withdraw</button>
+        </div>
+      </div>
+    </div>
+    <div class="pay-features">
+      <div class="pay-feature"><div class="pay-feature-icon">ESCROW</div><div class="pay-feature-title">Escrow System</div><div class="pay-feature-desc">Money held safely until service is completed and verified by you.</div></div>
+      <div class="pay-feature"><div class="pay-feature-icon">INSTANT</div><div class="pay-feature-title">Instant Settlement</div><div class="pay-feature-desc">Garage receives payment instantly after your confirmation.</div></div>
+      <div class="pay-feature"><div class="pay-feature-icon">FLEET</div><div class="pay-feature-title">Fleet Prepaid</div><div class="pay-feature-desc">Preload balance for your entire fleet. Bulk discounts available.</div></div>
+      <div class="pay-feature"><div class="pay-feature-icon">AUDIT</div><div class="pay-feature-title">Full Audit Log</div><div class="pay-feature-desc">Every transaction logged. Dispute resolution in 24 hours.</div></div>
+    </div>
+    <div style="max-width:400px; margin:0 auto 40px; padding:0 20px;">
+      <div class="data-table">
+        <div class="table-header"><div class="table-title">Recent Transactions</div></div>
+        <div class="table-row"><div class="col">AutoFix Pro — AC Repair</div><div class="col-sm" style="color:var(--red);">-Rs.998</div></div>
+        <div class="table-row"><div class="col">Wallet Top-up</div><div class="col-sm" style="color:var(--green);">+Rs.2,000</div></div>
+        <div class="table-row"><div class="col">SpeedTech — Tyre Change</div><div class="col-sm" style="color:var(--red);">-Rs.650</div></div>
+        <div class="table-row"><div class="col">Escrow Refund</div><div class="col-sm" style="color:var(--green);">+Rs.200</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav" id="bottomNav">
+  <div class="bottom-nav-item active" onclick="showPage('landing'); setBottomActive(this)"><div class="bottom-nav-label">HOME</div></div>
+  <div class="bottom-nav-item" onclick="showPage('customer'); setBottomActive(this)"><div class="bottom-nav-label">FIND</div></div>
+  <div class="bottom-nav-item" onclick="showPage('garage'); setBottomActive(this)"><div class="bottom-nav-label">GARAGE</div></div>
+  <div class="bottom-nav-item" onclick="showPage('pay-page'); setBottomActive(this)"><div class="bottom-nav-label">PAY</div></div>
+  <div class="bottom-nav-item" onclick="showPage('admin'); setBottomActive(this)"><div class="bottom-nav-label">ADMIN</div></div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function doSearch() {
+  var q = document.getElementById('heroSearch').value;
+  if (q.trim()) showPage('customer');
+}
+function openBooking(name) {
+  document.getElementById('modalGarageName').textContent = 'Book ' + name;
+  document.getElementById('bookingContent').style.display = 'block';
+  document.getElementById('bookingSuccess').classList.remove('active');
+  document.getElementById('bookingModal').classList.add('active');
+}
+function closeBooking() { document.getElementById('bookingModal').classList.remove('active'); }
+function confirmBooking() {
+  document.getElementById('bookingContent').style.display = 'none';
+  document.getElementById('bookingSuccess').classList.add('active');
+}
+function selectService(el) {
+  el.parentElement.querySelectorAll('.service-opt').forEach(function(o) { o.classList.remove('selected'); });
+  el.classList.add('selected');
+}
+function setTab(el) {
+  document.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  el.classList.add('active');
+}
+function setBottomActive(el) {
+  document.querySelectorAll('.bottom-nav-item').forEach(function(i) { i.classList.remove('active'); });
+  el.classList.add('active');
+}
+document.getElementById('bookingModal').addEventListener('click', function(e) {
+  if (e.target === this) closeBooking();
+});
+</script>
+</body>
+</html>
+
+
+ 
